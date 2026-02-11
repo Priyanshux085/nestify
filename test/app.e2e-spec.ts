@@ -20,6 +20,35 @@ describe('AppController (e2e)', () => {
     return request(app.getHttpServer())
       .get('/')
       .expect(200)
-      .expect('Hello World!');
+      .expect((res) => {
+        expect(res.body.success).toBe(true);
+        expect(res.body.data).toBe('Hello World!');
+        expect(typeof res.body.meta.timestamp).toBe('number');
+      });
+  });
+
+  it('/health (GET)', () => {
+    return request(app.getHttpServer())
+      .get('/health')
+      .expect(200)
+      .expect((res) => {
+        expect(res.body.success).toBe(true);
+        expect(res.body.data.status).toBe('ok');
+        expect(typeof res.body.data.uptime).toBe('number');
+        expect(typeof res.body.data.timestamp).toBe('number');
+        expect(typeof res.body.meta.timestamp).toBe('number');
+      });
+  });
+
+  it('/users/:id (GET) - not found returns standardized error', () => {
+    return request(app.getHttpServer())
+      .get('/users/99')
+      .expect(404)
+      .expect((res) => {
+        expect(res.body.success).toBe(false);
+        expect(typeof res.body.error.message).toBe('string');
+        expect(res.body.error.status).toBe(404);
+        expect(typeof res.body.meta.timestamp).toBe('number');
+      });
   });
 });
