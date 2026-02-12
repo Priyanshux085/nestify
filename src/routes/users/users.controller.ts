@@ -45,8 +45,12 @@ export class UsersController {
 
   @Post()
   async create(@Body() user: UserBodyDTO) {
-    const newUser = this.usersService.create(user);
-    return sendSuccess(newUser, 'User created successfully', 201);
+    try {
+      const newUser = await this.usersService.create(user);
+      return sendSuccess(newUser, 'User created successfully', 201);
+    } catch (error) {
+      return sendError(error.message, 'Failed to create user', 500);
+    }
   }
 
   @Patch(':id')
