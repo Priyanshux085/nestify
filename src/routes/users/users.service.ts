@@ -9,7 +9,7 @@ export class UsersService {
   async create(user: UserBodyDTO): Promise<UserDTO> {
     const client = await this.pool.connect();
     try {
-      const { rows } = await client.query(
+      const { rows } = await client.query<UserDTO>(
         'INSERT INTO users(name, email, password, created_at, updated_at) VALUES($1, $2, $3, NOW(), NOW()) RETURNING id, name, email, created_at AS "createdAt", updated_at AS "updatedAt"',
         [user.name, user.email, user.password],
       );
@@ -22,7 +22,7 @@ export class UsersService {
   async findAll(): Promise<UserDTO[]> {
     const client = await this.pool.connect();
     try {
-      const { rows } = await client.query(
+      const { rows } = await client.query<UserDTO>(
         'SELECT id, name, email, created_at AS "createdAt", updated_at AS "updatedAt" FROM users',
       );
       return rows;
@@ -34,7 +34,7 @@ export class UsersService {
   async findUserByEmail(email: string): Promise<UserDTO> {
     const client = await this.pool.connect();
     try {
-      const { rows } = await client.query(
+      const { rows } = await client.query<UserDTO>(
         'SELECT id, name, email, created_at AS "createdAt", updated_at AS "updatedAt" FROM users WHERE email = $1',
         [email],
       );
@@ -99,7 +99,7 @@ export class UsersService {
     const client = await this.pool.connect();
     try {
       const res = await client.query('DELETE FROM users WHERE id = $1', [id]);
-      return res.rowCount > 0;
+      return (res.rowCount ?? 0) > 0;
     } finally {
       client.release();
     }
